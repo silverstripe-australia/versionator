@@ -1,7 +1,7 @@
 {
     "require": {
         "knplabs/packagist-api": "1.*@dev",
-		"knplabs/github-api": "~1.2"
+		"cpliakas/git-wrapper": "dev-master"
     },
 	"autoload": {
         "psr-0": {
