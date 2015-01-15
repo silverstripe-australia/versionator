@@ -1,0 +1,11 @@
+{
+    "require": {
+        "knplabs/packagist-api": "1.*@dev",
+		"knplabs/github-api": "~1.2"
+    },
+	"autoload": {
+        "psr-0": {
+            "SSAU": "src/"
+        }
+    }
+}
