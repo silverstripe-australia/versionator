@@ -6,10 +6,23 @@ use Packagist\Api\Result\Package\Version;
 use GitWrapper\GitWrapper;
 
 $managed = array(
+	'sheadawson/silverstripe-datachange-tracker',
+	'silverstripe/advancedworkflow',
+	'silverstripe/listingpage',
+	'silverstripe/queuedjobs',
 	"silverstripe/multivaluefield",
 	"silverstripe/queuedjobs",
 	"silverstripe/restrictedobjects",
 	"silverstripe/webservices",
+	'silverstripe/versionedfiles',
+	'silverstripe/multivaluefield',
+
+//	'silverstripe/secureassets',
+//	'silverstripe/taxonomy',
+//	'silverstripe/userforms',
+//	'silverstripe/display-logic',
+//	'unclecheese/betterbuttons',
+//	'undefinedoffset/sortablegridfield',
 );
 
 $options = getopt('f:w:');
@@ -77,8 +90,12 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 	}
 
 
-	if (version_compare($latestVersion, $requiredVersion) > 0) {
-		$notices[] = "$packageName has a fixed version available $latestVersion (currently $requiredVersion)";
+	if (version_compare($latestVersion, $requiredVersion) > 0 && $latestVersion) {
+		$notices[] = "✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)";
+	} else if (!$latestVersion) {
+		$notices[] = "✘ $packageName has no proper version available";
+	} else {
+		$notices[] = "✔ $packageName looks to be using the latest available version";
 	}
 
 	// now check out the project
@@ -89,6 +106,8 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		} else {
 			$git = $wrapper->workingCopy($path);
 			$git->checkout('master', array('f' => true));
+			$git->pull();
+			$git->fetch(array('tags' => true));
 		}
 
 		$git->clearOutput();
@@ -98,17 +117,21 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		$git->log($latestRef . '..master', array('pretty' => 'oneline', 'abbrev-commit' => true));
 		$out = trim($git->getOutput());
 		
-		$lines = explode("\n", $out);
-		
-		if (count($lines) > 0) {
-			$notices[] = "$packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master";
-			$notices[] = $out;
+		if (strlen($out)) {
+			$lines = explode("\n", $out);
+			if (count($lines) > 0) {
+				$notices[] = "✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master";
+				$notices[] = $out;
+			}
+		} else {
+			$notices[] = "✔ $packageName @ $latestVersion appears to be up-to-date";
 		}
 	}
-	
+
 	$notices[] = "\n";
 }
 
+o("\n\n");
 
 foreach ($notices as $notice) {
 	o($notice);
