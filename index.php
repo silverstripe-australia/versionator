@@ -101,11 +101,11 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 
 
 	if (version_compare($latestVersion, $requiredVersion) > 0 && $latestVersion) {
-		$notices[] = "✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)";
+		$notices[] = "\033[31m✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)\033[0m";
 	} else if (!$latestVersion) {
-		$notices[] = "✘ $packageName has no proper version available";
+		$notices[] = "\033[31m✘ $packageName has no proper version available\033[0m";
 	} else {
-		$notices[] = "✔ $packageName looks to be using the latest available version";
+		$notices[] = "\033[32m✔ $packageName looks to be using the latest available version\033[0m";
 	}
 
 	// now check out the project
@@ -130,11 +130,11 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		if (strlen($out)) {
 			$lines = explode("\n", $out);
 			if (count($lines) > 0) {
-				$notices[] = "✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master";
+				$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m";
 				$notices[] = "$out\n";
 			}
 		} else {
-			$notices[] = "✔ $packageName @ $latestVersion appears to be up-to-date\n";
+			$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
 		}
 	}
 }
