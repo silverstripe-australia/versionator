@@ -5,25 +5,35 @@ include_once __DIR__ . '/vendor/autoload.php';
 use Packagist\Api\Result\Package\Version;
 use GitWrapper\GitWrapper;
 
-$managed = array(
-	'sheadawson/silverstripe-datachange-tracker',
-	'silverstripe/advancedworkflow',
-	'silverstripe/listingpage',
-	'silverstripe/queuedjobs',
-	"silverstripe/multivaluefield",
-	"silverstripe/queuedjobs",
-	"silverstripe/restrictedobjects",
-	"silverstripe/webservices",
-	'silverstripe/versionedfiles',
-	'silverstripe/multivaluefield',
+// These are set to the ba-sis modules by default.
 
-//	'silverstripe/secureassets',
-//	'silverstripe/taxonomy',
-//	'silverstripe/userforms',
-//	'silverstripe/display-logic',
-//	'unclecheese/betterbuttons',
-//	'undefinedoffset/sortablegridfield',
+$managed = array(
+	"nglasl/silverstripe-extensible-search",
+	"sheadawson/silverstripe-blocks",
+	"sheadawson/silverstripe-datachange-tracker",
+	"sheadawson/silverstripe-linkable",
+	"sheadawson/silverstripe-timednotices",
+	"silverstripe-australia/grouped-cms-menu",
+	"silverstripe-australia/metadata",
+	"silverstripe-australia/silverstripe-multisites",
+	"silverstripe-australia/sitemap",
+	"silverstripe/advancedworkflow",
+	"silverstripe/listingpage",
+	"silverstripe/queuedjobs",
+	"silverstripe/secureassets",
+	"silverstripe/taxonomy",
+	"silverstripe/userforms",
+	"silverstripe/versionedfiles",
+	"unclecheese/betterbuttons",
+	"undefinedoffset/sortablegridfield",
+	"sheadawson/quickaddnew",
+	"silverstripe-australia/gridfieldextensions",
+	"silverstripe/display-logic",
+	"silverstripe/multivaluefield",
+	"silverstripe/timepickerfield"
 );
+
+echo "\n";
 
 $options = getopt('f:w:');
 
@@ -33,7 +43,7 @@ if (!isset($options['f'])) {
 
 $file = realpath($options['f']);
 if (!file_exists($file)) {
-	o("Could not read $file");
+	o("Could not read $file\n");
 	exit();
 }
 
@@ -42,12 +52,12 @@ $workspace = isset($options['w']) ? $options['w'] : __DIR__ . '/workspace';
 $composer = json_decode(file_get_contents($file));
 
 if (!$composer) {
-	o("Could not parse composer details");
+	o("Could not parse composer details\n");
 	exit();
 }
 
 if (!isset($composer->require)) {
-	o("No requirements found, enjoy!");
+	o("No requirements found, enjoy!\n");
 	exit();
 }
 
@@ -67,7 +77,7 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 
 	$package = $client->get($packageName);
 
-	o("Retrieved package " . $package->getName());
+	o("Retrieved package " . $package->getName() . "\n");
 
 	$latestVersion = 0;
 	$repo = null;
@@ -121,22 +131,17 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 			$lines = explode("\n", $out);
 			if (count($lines) > 0) {
 				$notices[] = "✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master";
-				$notices[] = $out;
+				$notices[] = "$out\n";
 			}
 		} else {
-			$notices[] = "✔ $packageName @ $latestVersion appears to be up-to-date";
+			$notices[] = "✔ $packageName @ $latestVersion appears to be up-to-date\n";
 		}
 	}
-
-	$notices[] = "\n";
 }
-
-o("\n\n");
 
 foreach ($notices as $notice) {
 	o($notice);
 }
-echo "\n";
 
 function o($txt) {
 	echo "$txt\n";
