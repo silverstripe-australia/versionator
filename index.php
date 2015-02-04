@@ -30,7 +30,10 @@ $managed = array(
 	"silverstripe-australia/gridfieldextensions",
 	"silverstripe/display-logic",
 	"silverstripe/multivaluefield",
-	"silverstripe/timepickerfield"
+	"silverstripe/timepickerfield",
+	"silverstripe/restrictedobjects",
+	"silverstripe/frontend-dashboards",
+	"silverstripe/microblog",
 );
 
 echo "\n";
