@@ -9,6 +9,7 @@ use GitWrapper\GitWrapper;
 
 $managed = array(
 	"nglasl/silverstripe-extensible-search",
+	"silverstripe-australia/memberprofiles",
 	"sheadawson/silverstripe-blocks",
 	"sheadawson/silverstripe-datachange-tracker",
 	"sheadawson/silverstripe-linkable",
@@ -34,6 +35,7 @@ $managed = array(
 	"silverstripe/restrictedobjects",
 	"silverstripe/frontend-dashboards",
 	"silverstripe/microblog",
+	"silverstripe-australia/ba-sis",
 );
 
 echo "\n";
