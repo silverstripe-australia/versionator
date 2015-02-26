@@ -5,38 +5,35 @@ include_once __DIR__ . '/vendor/autoload.php';
 use Packagist\Api\Result\Package\Version;
 use GitWrapper\GitWrapper;
 
-// These are set to the ba-sis modules by default.
+// The list of managed modules. A key/value map of 
+// module_name => max_version_checked
+// If no key is set, it is presumed that there's no max to check against, and that the value is the module
+// name. 
+// If the key is set, and the max_version supplied, versions up to the provided value are compared against; greater 
+// than that are ignored. This is to handle cases where some projects have branches labelled after the SS version, 
+// eg Better Buttons. 
+$managed = array();
 
-$managed = array(
-	"nglasl/silverstripe-extensible-search",
-	"silverstripe-australia/memberprofiles",
-	"sheadawson/silverstripe-blocks",
-	"sheadawson/silverstripe-datachange-tracker",
-	"sheadawson/silverstripe-linkable",
-	"sheadawson/silverstripe-timednotices",
-	"silverstripe-australia/grouped-cms-menu",
-	"silverstripe-australia/metadata",
-	"silverstripe-australia/silverstripe-multisites",
-	"silverstripe-australia/sitemap",
-	"silverstripe/advancedworkflow",
-	"silverstripe/listingpage",
-	"silverstripe/queuedjobs",
-	"silverstripe/secureassets",
-	"silverstripe/taxonomy",
-	"silverstripe/userforms",
-	"silverstripe/versionedfiles",
-	"unclecheese/betterbuttons",
-	"undefinedoffset/sortablegridfield",
-	"sheadawson/quickaddnew",
-	"silverstripe-australia/gridfieldextensions",
-	"silverstripe/display-logic",
-	"silverstripe/multivaluefield",
-	"silverstripe/timepickerfield",
-	"silverstripe/restrictedobjects",
-	"silverstripe/frontend-dashboards",
-	"silverstripe/microblog",
-	"silverstripe-australia/ba-sis",
-);
+// These are set to the ba-sis modules by default.
+if (file_exists(__DIR__.'/managed_modules.php')) {
+	$managed = include __DIR__.'/managed_modules.php';
+}
+
+$remapped = array();
+foreach ($managed as $key => $value) {
+	if (is_int($key)) {
+		$remapped[$value] = true;
+	} else {
+		$remapped[$key] = $value;
+	}
+}
+
+$managed = $remapped;
+
+$version_overrides = array();
+if (file_exists(__DIR__.'/version_overrides.php')) {
+	$version_overrides = include __DIR__.'/version_overrides.php';
+}
 
 echo "\n";
 
@@ -73,7 +70,7 @@ $wrapper = new GitWrapper();
 $notices = array();
 
 foreach ($composer->require as $packageName => $requiredVersion) {
-	if (!in_array($packageName, $managed)) {
+	if (!isset($managed[$packageName])) {
 		continue;
 	}
 
@@ -92,6 +89,15 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		/* @var $version Version */
 		$source = $version->getSource();
 
+		$maxVersion = $managed[$packageName];
+		if (!is_bool($maxVersion)) {
+			// if we're higher than the max version checked, we'll bail
+			$greaterThan = version_compare($version->getVersion(), $maxVersion);
+			if ($greaterThan > 0) {
+				continue;
+			}
+		}
+		
 		$comp = version_compare($version->getVersion(), $latestVersion);
 //		o("Comparing " . $version->getVersion() . " to $latestVersion : $comp");
 		if (version_compare($version->getVersion(), $latestVersion) > 0) {
