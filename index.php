@@ -37,8 +37,9 @@ if (file_exists(__DIR__.'/version_overrides.php')) {
 
 echo "\n";
 
-$options = getopt('f:w:t::', array(
-	'all-modules::'
+$options = getopt('f:w:', array(
+	'all-modules::',
+	'timeout::'
 ));
 
 if (!isset($options['f'])) {
@@ -68,7 +69,7 @@ if (!isset($composer->require)) {
 $client = new Packagist\Api\Client();
 
 $wrapper = new GitWrapper();
-$time = isset($options['t']) ? intval($options['t']) : 120;
+$time = isset($options['timeout']) ? intval($options['timeout']) : 120;
 $wrapper->setTimeout($time);
 
 $notices = array();
