@@ -99,7 +99,7 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		/* @var $version Version */
 		$source = $version->getSource();
 
-		if (!isset($options['all-modules']) && $maxVersion = $managed[$packageName] && !is_bool($maxVersion)) {
+		if (!isset($options['all-modules']) && ($maxVersion = $managed[$packageName]) && !is_bool($maxVersion)) {
 			// if we're higher than the max version checked, we'll bail
 			$greaterThan = version_compare($version->getVersion(), $maxVersion);
 			if ($greaterThan > 0) {
