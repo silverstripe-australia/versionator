@@ -37,7 +37,9 @@ if (file_exists(__DIR__.'/version_overrides.php')) {
 
 echo "\n";
 
-$options = getopt('f:w:');
+$options = getopt('f:w:t::', array(
+	'all-modules::'
+));
 
 if (!isset($options['f'])) {
 	exit("Specify a composer file to check.\n");
@@ -66,18 +68,26 @@ if (!isset($composer->require)) {
 $client = new Packagist\Api\Client();
 
 $wrapper = new GitWrapper();
+$time = isset($options['t']) ? intval($options['t']) : 120;
+$wrapper->setTimeout($time);
 
 $notices = array();
 
 foreach ($composer->require as $packageName => $requiredVersion) {
-	if (!isset($managed[$packageName])) {
+	if (($packageName === 'php') || (!isset($options['all-modules']) && !isset($managed[$packageName]))) {
 		continue;
 	}
 
 	$package_name = basename($packageName);
 	o("Checking requirement $packageName $requiredVersion");
 
+	try {
 	$package = $client->get($packageName);
+	}
+	catch(Exception $e) {
+		o("\033[31m✘ The package could not be found\n\033[0m");
+		continue;
+	}
 
 	o("Retrieved package " . $package->getName() . "\n");
 
@@ -89,15 +99,14 @@ foreach ($composer->require as $packageName => $requiredVersion) {
 		/* @var $version Version */
 		$source = $version->getSource();
 
-		$maxVersion = $managed[$packageName];
-		if (!is_bool($maxVersion)) {
+		if (!isset($options['all-modules']) && $maxVersion = $managed[$packageName] && !is_bool($maxVersion)) {
 			// if we're higher than the max version checked, we'll bail
 			$greaterThan = version_compare($version->getVersion(), $maxVersion);
 			if ($greaterThan > 0) {
 				continue;
 			}
 		}
-		
+
 		$comp = version_compare($version->getVersion(), $latestVersion);
 //		o("Comparing " . $version->getVersion() . " to $latestVersion : $comp");
 		if (version_compare($version->getVersion(), $latestVersion) > 0) {
