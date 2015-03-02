@@ -144,6 +144,7 @@ else {
 		if (($packageName === 'php') || (!isset($options['all-modules']) && !isset($managed[$packageName]))) {
 			continue;
 		}
+		$package_name = basename($packageName);
 
 		// Retrieve the module from packagist.
 
