@@ -122,7 +122,7 @@ if(isset($options['version-fix']) && $options['version-fix']) {
 
 				// The most recent tags are always found first, therfore we don't need to determine the latest.
 
-				else if(strpos($latest, substr($requiredVersion, 1, strpos($requiredVersion, '.'))) === 0) {
+				else if(strpos($latest, substr($requiredVersion, 1, strrpos($requiredVersion, '.'))) === 0) {
 
 					// Output the latest tag that matches the requirement version.
 
