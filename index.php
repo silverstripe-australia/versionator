@@ -79,6 +79,8 @@ $notices = array();
 
 if(isset($options['version-fix']) && $options['version-fix']) {
 	$modules = explode(',', $options['version-fix']);
+	$allRequirements = array();
+	
 	foreach($modules as $module) {
 
 		// Determine the dependencies of each module.
@@ -127,11 +129,21 @@ if(isset($options['version-fix']) && $options['version-fix']) {
 					// Output the latest tag that matches the requirement version.
 
 					o("\033[32m✔ The latest tag is $latest\n\033[0m");
+					
+					$allRequirements[$packageName] = $latest;
+					
 					break;
 				}
 			}
 		}
 	}
+	
+	o("Composer output: \n");
+	foreach ($allRequirements as $package => $version) {
+		o("\t\t" . '"' . $package . '": "' . $version . '",');
+	}
+	o('');
+	
 }
 
 // Determine whether any project modules have an updated tag available, or whether they need to be tagged.
