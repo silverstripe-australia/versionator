@@ -37,33 +37,34 @@ if (file_exists(__DIR__.'/version_overrides.php')) {
 
 echo "\n";
 
-$options = getopt('f:w:', array(
+$options = getopt('f:', array(
 	'timeout::',
+	'check-git',
 	'version-fix::',
-	'all-modules::'
+	'modules::',
+	'all-modules::',
+	'workspace::',
 ));
 
 if (!isset($options['f'])) {
+	usage();
 	exit("Specify a composer file to check.\n");
 }
 
 $file = realpath($options['f']);
 if (!file_exists($file)) {
+	usage();
 	o("Could not read $file\n");
 	exit();
 }
 
-$workspace = isset($options['w']) ? $options['w'] : __DIR__ . '/workspace';
+$workspace = isset($options['workspace']) ? $options['workspace'] : __DIR__ . '/workspace';
 
 $composer = json_decode(file_get_contents($file));
 
 if (!$composer) {
-	o("Could not parse composer details\n");
-	exit();
-}
-
-if (!isset($composer->require)) {
-	o("No requirements found, enjoy!\n");
+	usage();
+	o("Could not find composer details\n");
 	exit();
 }
 
@@ -75,83 +76,28 @@ $wrapper->setTimeout($time);
 
 $notices = array();
 
-// Determine whether any project module dependencies should be locked down to a specific tag.
+$composerFiles = array($file);
 
-if(isset($options['version-fix']) && $options['version-fix']) {
-	$modules = explode(',', $options['version-fix']);
-	$allRequirements = array();
-	
+if (isset($options['modules']) && $options['modules']) {
+	$modules = explode(',', $options['modules']);
 	foreach($modules as $module) {
-
-		// Determine the dependencies of each module.
-
-		$project = substr($file, 0, strlen($file) - 13);
+		$project = dirname($file);
 		$moduleComposer = "{$module}/composer.json";
-		$moduleComposerPath = "{$project}{$moduleComposer}";
-		if(!file_exists($moduleComposerPath) || !($dependencies = json_decode(file_get_contents($moduleComposerPath)))) {
-			o("Could not read/parse {$moduleComposer} for version fixing\n");
-			exit();
+		$moduleComposerPath = "{$project}/{$moduleComposer}";
+		
+		if(!file_exists($moduleComposerPath)) {
+			o("Could not read/parse {$moduleComposerPath}");
+			continue;
 		}
-		if(!isset($dependencies->require)) {
-			o("No requirements found, enjoy!\n");
-			exit();
-		}
-
-		// Check each requirement version that matches the ~X.X syntax.
-
-		foreach($dependencies->require as $packageName => $requiredVersion) {
-			if(($packageName === 'php') || !preg_match('#^\~[1-9]\.[0-9]\Z#', $requiredVersion)) {
-				continue;
-			}
-
-			// Retrieve the module from packagist.
-
-			$package = retrieve_package($packageName, $requiredVersion, $client);
-			if(!$package) {
-				continue;
-			}
-
-			// Retrieve the module versions.
-
-			foreach($package->getVersions() as $version) {
-
-				// Make sure the version is a valid tag.
-
-				$latest = $version->getVersion();
-				if(!preg_match('#^[1-9]\.[0-9]\.[0-9][0-9]?\Z#', $latest)) {
-					continue;
-				}
-
-				// The most recent tags are always found first, therfore we don't need to determine the latest.
-
-				else if(strpos($latest, substr($requiredVersion, 1, strrpos($requiredVersion, '.'))) === 0) {
-
-					// Output the latest tag that matches the requirement version.
-
-					o("\033[32m✔ The latest tag is $latest\n\033[0m");
-					
-					$allRequirements[$packageName] = $latest;
-					
-					break;
-				}
-			}
-		}
+		$composerFiles[] = $moduleComposerPath;
 	}
-	
-	o("Composer output: \n");
-	foreach ($allRequirements as $package => $version) {
-		o("\t\t" . '"' . $package . '": "' . $version . '",');
-	}
-	o('');
-	
 }
 
-// Determine whether any project modules have an updated tag available, or whether they need to be tagged.
-
-else {
-
-	// Check each requirement version.
-
+ 
+$allRequirements = array();
+	
+foreach ($composerFiles as $composerFile) {
+	$composer = json_decode(file_get_contents($composerFile));
 	foreach ($composer->require as $packageName => $requiredVersion) {
 		if (($packageName === 'php') || (!isset($options['all-modules']) && !isset($managed[$packageName]))) {
 			continue;
@@ -193,6 +139,7 @@ else {
 			}
 		}
 
+		$allRequirements[$packageName] = $latestVersion;
 
 		if (version_compare($latestVersion, $requiredVersion) > 0 && $latestVersion) {
 			$notices[] = "\033[31m✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)\033[0m";
@@ -203,7 +150,7 @@ else {
 		}
 
 		// now check out the project
-		if ($repo && $latestRef) {
+		if ($repo && $latestRef && isset($options['check-git'])) {
 			$path = $workspace . DIRECTORY_SEPARATOR . basename($package_name);
 			if (!file_exists($path)) {
 				$git = $wrapper->cloneRepository($source->getUrl(), $workspace . DIRECTORY_SEPARATOR . basename($package_name));
@@ -238,14 +185,21 @@ foreach ($notices as $notice) {
 	o($notice);
 }
 
+
+if(isset($options['version-fix']) && $options['version-fix']) {
+	o("Recommended project composer requirements: \n");
+	foreach ($allRequirements as $package => $version) {
+		o("\t\t" . '"' . $package . '": "' . $version . '",');
+	}
+	o('');
+}
+
+
 function o($txt) {
 	echo "$txt\n";
 }
 
 function retrieve_package($packageName, $requiredVersion, $client) {
-
-	o("Checking requirement $packageName $requiredVersion");
-
 	try {
 		$package = $client->get($packageName);
 	}
@@ -264,4 +218,20 @@ function del_tree($dir) {
 		(is_dir("$dir/$file") && !is_link($dir)) ? del_tree("$dir/$file") : unlink("$dir/$file");
 	}
 	return rmdir($dir);
+}
+
+
+function usage() {
+	o('php index.php -f /path/to/project/composer.json');
+	
+	o("\t--modules=comma,separated");
+	o("\t\tA list of modules in the project to include in the inspection");
+	
+	o("\t--version-fix=true");
+	o("\t\tWhether to output a 'recommended' composer .json that will provide");
+	o("\t\t_fixed_ versions to be bound to");
+	
+	o("\t--check-git=true");
+	o("\t\tWhether to check git repositories for differences between master and ");
+	o("\t\tthe latest tagged version ");
 }

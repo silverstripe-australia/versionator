@@ -29,6 +29,11 @@ $managed = array(
 	"silverstripe/frontend-dashboards",
 	"silverstripe/microblog",
 	"silverstripe-australia/ba-sis",
+	"silverstripe-australia/intranet-sis",
+	"silverstripe/solr",
+	"silverstripe-australia/build",
+	"silverstripe-australia/ssautesting",
+	
 );
 
 return $managed;
