@@ -1,6 +1,8 @@
 {
     "require": {
         "knplabs/packagist-api": "1.*@dev",
+		"erusev/parsedown": "~1.5",
+		"erusev/parsedown-extra": "~0.7",
 		"cpliakas/git-wrapper": "dev-master"
     },
 	"autoload": {

@@ -39,11 +39,12 @@ echo "\n";
 
 $options = getopt('f:', array(
 	'timeout::',
-	'check-git',
-	'version-fix::',
-	'modules::',
-	'all-modules::',
-	'workspace::',
+	'check-git',			// do we check whether the master branch is different from latest tag?
+	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
+	'modules::',			// which modules should we inspect? 
+	'all-modules::',		
+	'workspace::',			// what folder to use as the 'workspace' for checking out data into?
+	'readme::',				// should we generate a collation of 'readme' files?
 ));
 
 if (!isset($options['f'])) {
@@ -95,6 +96,7 @@ if (isset($options['modules']) && $options['modules']) {
 
  
 $allRequirements = array();
+$readmeContents = array();
 	
 foreach ($composerFiles as $composerFile) {
 	$composer = json_decode(file_get_contents($composerFile));
@@ -150,10 +152,10 @@ foreach ($composerFiles as $composerFile) {
 		}
 
 		// now check out the project
-		if ($repo && $latestRef && isset($options['check-git'])) {
+		if ($repo && $latestRef && (isset($options['check-git']) || isset($options['readme']))) {
 			$path = $workspace . DIRECTORY_SEPARATOR . basename($package_name);
 			if (!file_exists($path)) {
-				$git = $wrapper->cloneRepository($source->getUrl(), $workspace . DIRECTORY_SEPARATOR . basename($package_name));
+				$git = $wrapper->cloneRepository($source->getUrl(), $path);
 			} else {
 				$git = $wrapper->workingCopy($path);
 				$git->checkout('master', array('f' => true));
@@ -168,14 +170,21 @@ foreach ($composerFiles as $composerFile) {
 			$git->log($latestRef . '..master', array('pretty' => 'oneline', 'abbrev-commit' => true));
 			$out = trim($git->getOutput());
 
-			if (strlen($out)) {
-				$lines = explode("\n", $out);
-				if (count($lines) > 0) {
-					$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m";
-					$notices[] = "$out\n";
+			if (isset($options['check-git'])) {
+				if (strlen($out)) {
+					$lines = explode("\n", $out);
+					if (count($lines) > 0) {
+						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m";
+						$notices[] = "$out\n";
+					}
+				} else {
+					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
 				}
-			} else {
-				$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
+			} 
+			if (isset($options['readme'])) {
+				if (file_exists($path . '/README.md')) {
+					$readmeContents[$package_name] = file_get_contents($path . '/README.md');
+				}
 			}
 		}
 	}
@@ -192,6 +201,40 @@ if(isset($options['version-fix']) && $options['version-fix']) {
 		o("\t\t" . '"' . $package . '": "' . $version . '",');
 	}
 	o('');
+}
+
+if (count($readmeContents)) {
+	$dir = 'readme';
+	if (isset($options['readme']) && is_string($options['readme']) && strlen($options['readme']) > 1) {
+		$dir = $options['readme'];
+	}
+	
+	if ($dir{0} != '/') {
+		$dir = $workspace . '/' . $dir;
+	}
+	if (is_bool($dir)) {
+		exit("Something's busted");
+	}
+	if (is_dir($dir)) {
+		del_tree($dir);
+	}
+	mkdir($dir);
+	
+	$p = new ParsedownExtra();
+	$links = array();
+	foreach ($readmeContents as $name => $content) {
+		$outfile = $dir . '/' . $name . '.html';
+		$content = $p->text($content);
+		file_put_contents($outfile, $content);
+		$links[] = $name;
+	}
+	
+	$indexContent = '';
+	foreach ($links as $link) {
+		$indexContent .= "* [$link]($link.html)\n";
+	}
+	$indexContent = $p->text($indexContent);
+	file_put_contents($dir .'/index.html', $indexContent);
 }
 
 
