@@ -13,10 +13,9 @@ dependencies for SilverStripe projects.
   not have the latest code)
 * Generate README information about the modules used in the project
 
-
 ## When to use
 
-Use this if
+Use this if:
 
 * you want to generate a list of fixed version composer dependencies for a
   SilverStripe project
@@ -28,13 +27,11 @@ Use this if
 The motivation behind this tool is for projects to have a well
 defined version set of modules defined in the composer.json for that project.
 
-
-
 ## Usage
 
-`php index.php -f /path/to/project/composer.json`
+`versionator -f /path/to/project/composer.json`
 
-Will output the list of modules and their latest versions in packagist
+Will output the list of modules and their latest versions in packagist.
 
 **Options**
 
@@ -47,18 +44,13 @@ Will output the list of modules and their latest versions in packagist
 * **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
   If output path not specified, output is to versionator/workspace/readme
 
-
 ## Installing
 
-If you wish to run this from anywhere, create a shell script similar to
+If you wish to run this from anywhere, simply add your checkout of versionator to your PATH in your ~/.bash_profile (or ~/.bashrc) like this:
 
 ```
-#!/bin/bash
-php /home/user/path/to/versionator/index.php "$@"
+export PATH=$PATH:/path/to/versionator
 ```
-
-and place it in your */bin folder
-
 
 ## Example outputs
 
@@ -121,7 +113,6 @@ Recommended project composer requirements:
 
 
 ```
-
 
 Adding additional modules to dig into from the project (note the extra modules included).
 
