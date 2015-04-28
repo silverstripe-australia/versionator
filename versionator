@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 include_once __DIR__ . '/vendor/autoload.php';
@@ -5,13 +6,13 @@ include_once __DIR__ . '/vendor/autoload.php';
 use Packagist\Api\Result\Package\Version;
 use GitWrapper\GitWrapper;
 
-// The list of managed modules. A key/value map of 
+// The list of managed modules. A key/value map of
 // module_name => max_version_checked
 // If no key is set, it is presumed that there's no max to check against, and that the value is the module
-// name. 
-// If the key is set, and the max_version supplied, versions up to the provided value are compared against; greater 
-// than that are ignored. This is to handle cases where some projects have branches labelled after the SS version, 
-// eg Better Buttons. 
+// name.
+// If the key is set, and the max_version supplied, versions up to the provided value are compared against; greater
+// than that are ignored. This is to handle cases where some projects have branches labelled after the SS version,
+// eg Better Buttons.
 $managed = array();
 
 // These are set to the ba-sis modules by default.
@@ -45,8 +46,8 @@ $options = getopt('f:', array(
 	'timeout::',
 	'check-git',			// do we check whether the master branch is different from latest tag?
 	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
-	'modules::',			// which modules should we inspect? 
-	'all-modules::',		
+	'modules::',			// which modules should we inspect?
+	'all-modules::',
 	'workspace::',			// what folder to use as the 'workspace' for checking out data into?
 	'readme::',				// should we generate a collation of 'readme' files?
 ));
@@ -89,7 +90,7 @@ if (isset($options['modules']) && $options['modules']) {
 		$project = dirname($file);
 		$moduleComposer = "{$module}/composer.json";
 		$moduleComposerPath = "{$project}/{$moduleComposer}";
-		
+
 		if(!file_exists($moduleComposerPath)) {
 			o("Could not read/parse {$moduleComposerPath}");
 			continue;
@@ -98,10 +99,10 @@ if (isset($options['modules']) && $options['modules']) {
 	}
 }
 
- 
+
 $allRequirements = array();
 $readmeContents = array();
-	
+
 foreach ($composerFiles as $composerFile) {
 	$composer = json_decode(file_get_contents($composerFile));
 	foreach ($composer->require as $packageName => $requiredVersion) {
@@ -184,7 +185,7 @@ foreach ($composerFiles as $composerFile) {
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
 				}
-			} 
+			}
 			if (isset($options['readme'])) {
 				if (file_exists($path . '/README.md')) {
 					$readmeContents[$package_name] = file_get_contents($path . '/README.md');
@@ -212,7 +213,7 @@ if (count($readmeContents)) {
 	if (isset($options['readme']) && is_string($options['readme']) && strlen($options['readme']) > 1) {
 		$dir = $options['readme'];
 	}
-	
+
 	if ($dir{0} != '/') {
 		$dir = $workspace . '/' . $dir;
 	}
@@ -223,7 +224,7 @@ if (count($readmeContents)) {
 		del_tree($dir);
 	}
 	mkdir($dir);
-	
+
 	$p = new ParsedownExtra();
 	$links = array();
 	foreach ($readmeContents as $name => $content) {
@@ -232,7 +233,7 @@ if (count($readmeContents)) {
 		file_put_contents($outfile, $content);
 		$links[] = $name;
 	}
-	
+
 	$indexContent = '';
 	foreach ($links as $link) {
 		$indexContent .= "* [$link]($link.html)\n";
@@ -270,15 +271,16 @@ function del_tree($dir) {
 
 function usage() {
 	o('php index.php -f /path/to/project/composer.json');
-	
+
 	o("\t--modules=comma,separated");
 	o("\t\tA list of modules in the project to include in the inspection");
-	
+
 	o("\t--version-fix=true");
 	o("\t\tWhether to output a 'recommended' composer .json that will provide");
 	o("\t\t_fixed_ versions to be bound to");
-	
+
 	o("\t--check-git=true");
 	o("\t\tWhether to check git repositories for differences between master and ");
 	o("\t\tthe latest tagged version ");
 }
+
