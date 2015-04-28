@@ -3,10 +3,6 @@
 A tool that helps with reviewing the state of your composer.json 
 dependencies for SilverStripe projects. 
 
-The motivation behind this tool is for projects to have a well
-defined version set of modules defined in the composer.json for that project. 
-
-
 ## Features
 
 * List current module versions, along with the latest version available on 
@@ -15,6 +11,24 @@ defined version set of modules defined in the composer.json for that project.
 * Check modules to determine whether there are changes in `master` that 
   haven't been incorporated into a tag (ie whether the latest stable _may_ 
   not have the latest code) 
+* Generate README information about the modules used in the project
+
+
+## When to use
+
+Use this if 
+
+* you want to generate a list of fixed version composer dependencies for a 
+  SilverStripe project
+* You want to see whether the modules in your project have any updates 
+  that could be made use of
+* You want to know whether a repository has any changes that haven't made it
+  to a stable tagged release yet. 
+
+The motivation behind this tool is for projects to have a well
+defined version set of modules defined in the composer.json for that project. 
+
+
 
 ## Usage
 
@@ -30,6 +44,8 @@ Will output the list of modules and their latest versions in packagist
   that will provide _fixed_ versions to be bound to
 * **--check-git=true** Whether to check git repositories for differences 
   between master and the latest tagged version of modules
+* **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
+  If output path not specified, output is to versionator/workspace/readme
 
 
 ## Installing
