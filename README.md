@@ -1,32 +1,32 @@
 # Versionator
 
-A tool that helps with reviewing the state of your composer.json 
-dependencies for SilverStripe projects. 
+A tool that helps with reviewing the state of your composer.json
+dependencies for SilverStripe projects.
 
 ## Features
 
-* List current module versions, along with the latest version available on 
+* List current module versions, along with the latest version available on
   packagist for that module
 * Output a 'recommended' set of dependencies in composer format
-* Check modules to determine whether there are changes in `master` that 
-  haven't been incorporated into a tag (ie whether the latest stable _may_ 
-  not have the latest code) 
+* Check modules to determine whether there are changes in `master` that
+  haven't been incorporated into a tag (ie whether the latest stable _may_
+  not have the latest code)
 * Generate README information about the modules used in the project
 
 
 ## When to use
 
-Use this if 
+Use this if
 
-* you want to generate a list of fixed version composer dependencies for a 
+* you want to generate a list of fixed version composer dependencies for a
   SilverStripe project
-* You want to see whether the modules in your project have any updates 
+* You want to see whether the modules in your project have any updates
   that could be made use of
 * You want to know whether a repository has any changes that haven't made it
-  to a stable tagged release yet. 
+  to a stable tagged release yet.
 
 The motivation behind this tool is for projects to have a well
-defined version set of modules defined in the composer.json for that project. 
+defined version set of modules defined in the composer.json for that project.
 
 
 
@@ -38,11 +38,11 @@ Will output the list of modules and their latest versions in packagist
 
 **Options**
 
-* **--modules=comma,separated,list** - A list of modules in the project 
+* **--modules=comma,separated,list** - A list of modules in the project
   to also include the composer.json settings for deeper inspection
-* **--version-fix** - Whether to output a 'recommended' composer .json 
+* **--version-fix** - Whether to output a 'recommended' composer .json
   that will provide _fixed_ versions to be bound to
-* **--check-git=true** Whether to check git repositories for differences 
+* **--check-git=true** Whether to check git repositories for differences
   between master and the latest tagged version of modules
 * **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
   If output path not specified, output is to versionator/workspace/readme
@@ -65,7 +65,7 @@ and place it in your */bin folder
 Default output
 
 ```
-$ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json 
+$ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json
 
 Retrieved package silverstripe-australia/build
 
@@ -110,7 +110,7 @@ Retrieved package silverstripe/microblog
 ✘ silverstripe/restrictedobjects has an updated, fixed tag version available 2.1.5 (currently 2.1.*)
 ✘ silverstripe/frontend-dashboards has an updated, fixed tag version available 1.2.2 (currently ~1.2.0)
 ✘ silverstripe/microblog has an updated, fixed tag version available 1.9.3 (currently ~1.9.0)
-Recommended project composer requirements: 
+Recommended project composer requirements:
 
 		"silverstripe-australia/build": "1.2.3",
 		"silverstripe-australia/ssautesting": "1.1.1",
@@ -123,7 +123,7 @@ Recommended project composer requirements:
 ```
 
 
-Adding additional modules to dig into from the project (note the extra modules included). 
+Adding additional modules to dig into from the project (note the extra modules included).
 
 ```
 $ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json --modules=microblog
