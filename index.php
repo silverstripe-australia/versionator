@@ -19,6 +19,10 @@ if (file_exists(__DIR__.'/managed_modules.php')) {
 	$managed = include __DIR__.'/managed_modules.php';
 }
 
+if (file_exists(__DIR__ . '/custom_modules.php')) {
+	$managed = include __DIR__ . '/custom_modules.php';
+}
+
 $remapped = array();
 foreach ($managed as $key => $value) {
 	if (is_int($key)) {
