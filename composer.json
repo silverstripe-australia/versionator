@@ -4,10 +4,5 @@
 		"erusev/parsedown": "~1.5",
 		"erusev/parsedown-extra": "~0.7",
 		"cpliakas/git-wrapper": "dev-master"
-    },
-	"autoload": {
-        "psr-0": {
-            "SSAU": "src/"
-        }
     }
 }
