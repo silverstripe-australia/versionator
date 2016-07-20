@@ -29,7 +29,7 @@ defined version set of modules defined in the composer.json for that project.
 
 ## Usage
 
-`versionator -f /path/to/project/composer.json`
+`php versionator -f /path/to/project/composer.json`
 
 Will output the list of modules and their latest versions in packagist.
 
