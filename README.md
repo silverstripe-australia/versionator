@@ -27,9 +27,17 @@ Use this if:
 The motivation behind this tool is for projects to have a well
 defined version set of modules defined in the composer.json for that project.
 
+## Installing
+
+If you wish to run this from anywhere, simply add your checkout of versionator to your PATH in your ~/.bash_profile (or ~/.bashrc) like this:
+
+```
+export PATH=$PATH:/path/to/versionator
+```
+
 ## Usage
 
-`php versionator -f /path/to/project/composer.json`
+`versionator -f /path/to/project/composer.json`
 
 Will output the list of modules and their latest versions in packagist.
 
@@ -43,14 +51,6 @@ Will output the list of modules and their latest versions in packagist.
   between master and the latest tagged version of modules
 * **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
   If output path not specified, output is to versionator/workspace/readme
-
-## Installing
-
-If you wish to run this from anywhere, simply add your checkout of versionator to your PATH in your ~/.bash_profile (or ~/.bashrc) like this:
-
-```
-export PATH=$PATH:/path/to/versionator
-```
 
 ## Example outputs
 
