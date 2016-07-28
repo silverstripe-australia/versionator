@@ -52,29 +52,83 @@ $options = getopt('f:', array(
 	'readme::',				// should we generate a collation of 'readme' files?
 ));
 
-if (!isset($options['f'])) {
-	usage();
-	exit("Specify a composer file to check.\n");
-}
-
-$file = realpath($options['f']);
-if (!file_exists($file)) {
-	usage();
-	o("Could not read $file\n");
-	exit();
-}
-
-$workspace = isset($options['workspace']) ? $options['workspace'] : __DIR__ . '/workspace';
-
-$composer = json_decode(file_get_contents($file));
-
-if (!$composer) {
-	usage();
-	o("Could not find composer details\n");
-	exit();
-}
-
 $client = new Packagist\Api\Client();
+$modules = array();
+
+// Determine whether there is a "composer.json" to check against.
+
+if(isset($options['f'])) {
+	$file = realpath($options['f']);
+	if(!file_exists($file)) {
+		usage();
+		o("Could not read $file\n");
+		exit();
+	}
+	$composer = json_decode(file_get_contents($file));
+	if(!$composer) {
+		usage();
+		o("Could not find composer details\n");
+		exit();
+	}
+	$composerFiles = array($file);
+
+	// Determine whether any further modules have been defined to check against.
+
+	if(isset($options['modules']) && $options['modules']) {
+		$modules = explode(',', $options['modules']);
+		foreach($modules as $module) {
+			$project = dirname($file);
+			$moduleComposer = "{$module}/composer.json";
+			$moduleComposerPath = "{$project}/{$moduleComposer}";
+
+			if(!file_exists($moduleComposerPath)) {
+				o("Could not read/parse {$moduleComposerPath}");
+				continue;
+			}
+			$composerFiles[] = $moduleComposerPath;
+		}
+	}
+}
+else {
+
+	// There is no "composer.json", therefore check against the SSAU modules.
+
+	$owners = array(
+		'silverstripe-australia',
+		'nglasl',
+		'nyeholt'
+	);
+	foreach($owners as $owner) {
+		$modules = array_merge($modules, $client->all(array(
+			'vendor' => $owner
+		)));
+	}
+
+	// These modules are also considered core.
+
+	$other = array(
+		'silverstripe/advancedworkflow',
+		'silverstripe/alchemiser',
+		'silverstripe/cdncontent',
+		'silverstripe/content-services',
+		'silverstripe/external-content',
+		'silverstripe/frontend-dashboards',
+		'silverstripe/listingpage',
+		'silverstripe/microblog',
+		'silverstripe/multivaluefield',
+		'silverstripe/queuedjobs',
+		'silverstripe/restrictedobjects',
+		'silverstripe/s3cdn',
+		'silverstripe/solr',
+		'silverstripe/syncrotron',
+		'silverstripe/usertemplates',
+		'silverstripe/versionedfiles',
+		'silverstripe/webservices'
+	);
+	$modules = array_merge($modules, $other);
+	$composerFiles = array(null);
+}
+$workspace = isset($options['workspace']) ? $options['workspace'] : __DIR__ . '/workspace';
 
 $wrapper = new GitWrapper();
 $time = isset($options['timeout']) ? intval($options['timeout']) : 120;
@@ -82,30 +136,37 @@ $wrapper->setTimeout($time);
 
 $notices = array();
 
-$composerFiles = array($file);
-
-if (isset($options['modules']) && $options['modules']) {
-	$modules = explode(',', $options['modules']);
-	foreach($modules as $module) {
-		$project = dirname($file);
-		$moduleComposer = "{$module}/composer.json";
-		$moduleComposerPath = "{$project}/{$moduleComposer}";
-
-		if(!file_exists($moduleComposerPath)) {
-			o("Could not read/parse {$moduleComposerPath}");
-			continue;
-		}
-		$composerFiles[] = $moduleComposerPath;
-	}
-}
-
-
 $allRequirements = array();
 $readmeContents = array();
 
 foreach ($composerFiles as $composerFile) {
-	$composer = json_decode(file_get_contents($composerFile));
-	foreach ($composer->require as $packageName => $requiredVersion) {
+
+	// The following is used to determine whether a "composer.json" was provided.
+
+	if($composerFile) {
+		$composer = json_decode(file_get_contents($composerFile));
+		$packages = $composer->require;
+	}
+	else {
+		$packages = array_flip($modules);
+
+		// The modules that we can ignore, since they're now abandoned.
+
+		$ignored = array(
+			'nyeholt/news',
+			'silverstripe-australia/intranet-sis'
+		);
+		foreach($ignored as $ignore) {
+			unset($packages[$ignore]);
+		}
+
+		// Use a base required version to check against.
+
+		foreach($packages as $package => $temporary) {
+			$packages[$package] = '~1.0';
+		}
+	}
+	foreach ($packages as $packageName => $requiredVersion) {
 		if (($packageName === 'php') || (!isset($options['all-modules']) && !isset($managed[$packageName]))) {
 			continue;
 		}
