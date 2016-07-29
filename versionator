@@ -6,35 +6,6 @@ include_once __DIR__ . '/vendor/autoload.php';
 use Packagist\Api\Result\Package\Version;
 use GitWrapper\GitWrapper;
 
-// The list of managed modules. A key/value map of
-// module_name => max_version_checked
-// If no key is set, it is presumed that there's no max to check against, and that the value is the module
-// name.
-// If the key is set, and the max_version supplied, versions up to the provided value are compared against; greater
-// than that are ignored. This is to handle cases where some projects have branches labelled after the SS version,
-// eg Better Buttons.
-$managed = array();
-
-// These are set to the ba-sis modules by default.
-if (file_exists(__DIR__.'/managed_modules.php')) {
-	$managed = include __DIR__.'/managed_modules.php';
-}
-
-if (file_exists(__DIR__ . '/custom_modules.php')) {
-	$managed = include __DIR__ . '/custom_modules.php';
-}
-
-$remapped = array();
-foreach ($managed as $key => $value) {
-	if (is_int($key)) {
-		$remapped[$value] = true;
-	} else {
-		$remapped[$key] = $value;
-	}
-}
-
-$managed = $remapped;
-
 $version_overrides = array();
 if (file_exists(__DIR__.'/version_overrides.php')) {
 	$version_overrides = include __DIR__.'/version_overrides.php';
@@ -42,17 +13,18 @@ if (file_exists(__DIR__.'/version_overrides.php')) {
 
 echo "\n";
 
-$options = getopt('f:', array(
-	'timeout::',
+$options = getopt('f:o:', array(
 	'check-git',			// do we check whether the master branch is different from latest tag?
-	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
 	'modules::',			// which modules should we inspect?
-	'all-modules::',
-	'workspace::',			// what folder to use as the 'workspace' for checking out data into?
 	'readme::',				// should we generate a collation of 'readme' files?
+	'ssau',
+	'timeout::',
+	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
+	'workspace::'			// what folder to use as the 'workspace' for checking out data into?
 ));
 
 $client = new Packagist\Api\Client();
+$composerFiles = array();
 $modules = array();
 
 // Determine whether there is a "composer.json" to check against.
@@ -89,45 +61,39 @@ if(isset($options['f'])) {
 		}
 	}
 }
-else {
+else if(isset($options['o']) && $options['o']) {
 
-	// There is no "composer.json", therefore check against the SSAU modules.
+	// There is no "composer.json", therefore check against specific packagist owner modules.
 
-	$owners = array(
-		'silverstripe-australia',
-		'nglasl',
-		'nyeholt'
-	);
+	$owners = explode(',', $options['o']);
 	foreach($owners as $owner) {
 		$modules = array_merge($modules, $client->all(array(
-			'vendor' => $owner
+			'vendor' => trim($owner)
 		)));
 	}
 
-	// These modules are also considered core.
+	// Determine whether the core SSAU supported packagist modules should be included.
 
-	$other = array(
-		'silverstripe/advancedworkflow',
-		'silverstripe/alchemiser',
-		'silverstripe/cdncontent',
-		'silverstripe/content-services',
-		'silverstripe/external-content',
-		'silverstripe/frontend-dashboards',
-		'silverstripe/listingpage',
-		'silverstripe/microblog',
-		'silverstripe/multivaluefield',
-		'silverstripe/queuedjobs',
-		'silverstripe/restrictedobjects',
-		'silverstripe/s3cdn',
-		'silverstripe/solr',
-		'silverstripe/syncrotron',
-		'silverstripe/usertemplates',
-		'silverstripe/versionedfiles',
-		'silverstripe/webservices'
-	);
-	$modules = array_merge($modules, $other);
-	$composerFiles = array(null);
+	if(isset($options['ssau']) && file_exists(__DIR__ . '/SSAU_supported_modules.php')) {
+		$other = include __DIR__ . '/SSAU_supported_modules.php';
+		$modules = array_merge($modules, $other);
+	}
+
+	// The following is used to determine whether a "composer.json" was provided.
+
+	if(count($modules)) {
+		$composerFiles = array(null);
+	}
 }
+else {
+
+	// Something needs to be provided, otherwise there's nothing to check.
+
+	usage();
+	o("Please either provide a \"-f composer.json\" or \"-o packagist-owner\"\n");
+	exit();
+}
+
 $workspace = isset($options['workspace']) ? $options['workspace'] : __DIR__ . '/workspace';
 
 $wrapper = new GitWrapper();
@@ -150,7 +116,7 @@ foreach ($composerFiles as $composerFile) {
 	else {
 		$packages = array_flip($modules);
 
-		// The modules that we can ignore, since they're now abandoned.
+		// The modules that we can ignore, since they're abandoned.
 
 		$ignored = array(
 			'nyeholt/news',
@@ -167,7 +133,7 @@ foreach ($composerFiles as $composerFile) {
 		}
 	}
 	foreach ($packages as $packageName => $requiredVersion) {
-		if (($packageName === 'php') || (!isset($options['all-modules']) && !isset($managed[$packageName]))) {
+		if($packageName === 'php') {
 			continue;
 		}
 		$package_name = basename($packageName);
@@ -186,14 +152,6 @@ foreach ($composerFiles as $composerFile) {
 		foreach ($package->getVersions() as $version) {
 			/* @var $version Version */
 			$source = $version->getSource();
-
-			if (!isset($options['all-modules']) && ($maxVersion = $managed[$packageName]) && !is_bool($maxVersion)) {
-				// if we're higher than the max version checked, we'll bail
-				$greaterThan = version_compare($version->getVersion(), $maxVersion);
-				if ($greaterThan > 0) {
-					continue;
-				}
-			}
 
 			$comp = version_compare($version->getVersion(), $latestVersion);
 	//		o("Comparing " . $version->getVersion() . " to $latestVersion : $comp");
@@ -259,7 +217,6 @@ foreach ($notices as $notice) {
 	o($notice);
 }
 
-
 if(isset($options['version-fix']) && $options['version-fix']) {
 	o("Recommended project composer requirements: \n");
 	foreach ($allRequirements as $package => $version) {
@@ -302,7 +259,6 @@ if (count($readmeContents)) {
 	file_put_contents($dir .'/index.html', $indexContent);
 }
 
-
 function o($txt) {
 	echo "$txt\n";
 }
@@ -328,7 +284,6 @@ function del_tree($dir) {
 	return rmdir($dir);
 }
 
-
 function usage() {
 	o('php index.php -f /path/to/project/composer.json');
 
@@ -343,4 +298,3 @@ function usage() {
 	o("\t\tWhether to check git repositories for differences between master and ");
 	o("\t\tthe latest tagged version ");
 }
-
