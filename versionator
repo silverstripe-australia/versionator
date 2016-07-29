@@ -169,7 +169,7 @@ foreach ($composerFiles as $composerFile) {
 		if (version_compare($latestVersion, $requiredVersion) > 0 && $latestVersion) {
 			$notices[] = "\033[31m✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)\033[0m";
 		} else if (!$latestVersion) {
-			$notices[] = "\033[0;36m✘ $packageName has no proper version available\033[0m\n";
+			$notices[] = "\033[0;36m✘ $packageName has no proper version available\033[0m";
 		} else {
 			$notices[] = "\033[32m✔ $packageName looks to be using the latest available version\033[0m";
 		}
@@ -179,6 +179,7 @@ foreach ($composerFiles as $composerFile) {
 			$path = $workspace . DIRECTORY_SEPARATOR . basename($package_name);
 			if (!file_exists($path)) {
 				$git = $wrapper->cloneRepository($source->getUrl(), $path);
+				$git->checkout('master', array('f' => true));
 			} else {
 				$git = $wrapper->workingCopy($path);
 				$git->checkout('master', array('f' => true));
@@ -190,7 +191,7 @@ foreach ($composerFiles as $composerFile) {
 			// checkout the 'latest' ref as far as packagist knows about, then check to see
 			// whether the repository has changes between it and the current master HEAD
 			// $git->diff($latestRef, array('name-status' => true));
-			$git->log($latestRef . '..master', array('pretty' => 'oneline'));
+			$git->log($latestRef . '..master', array('pretty' => 'oneline', 'abbrev-commit' => true));
 			$out = trim($git->getOutput());
 
 			if (isset($options['check-git'])) {
