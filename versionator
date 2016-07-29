@@ -233,15 +233,14 @@ foreach ($composerFiles as $composerFile) {
 			// checkout the 'latest' ref as far as packagist knows about, then check to see
 			// whether the repository has changes between it and the current master HEAD
 			// $git->diff($latestRef, array('name-status' => true));
-			$git->log($latestRef . '..master', array('pretty' => 'oneline', 'abbrev-commit' => true));
+			$git->log($latestRef . '..master', array('pretty' => 'oneline'));
 			$out = trim($git->getOutput());
 
 			if (isset($options['check-git'])) {
 				if (strlen($out)) {
 					$lines = explode("\n", $out);
 					if (count($lines) > 0) {
-						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m";
-						$notices[] = "$out\n";
+						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n";
 					}
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
