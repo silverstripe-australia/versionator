@@ -18,8 +18,8 @@ $options = getopt('f:o:', array(
 	'modules::',			// which modules should we inspect?
 	'readme::',				// should we generate a collation of 'readme' files?
 	'ssau',
-	'timeout::',
 	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
+	'timeout::',
 	'workspace::'			// what folder to use as the 'workspace' for checking out data into?
 ));
 
@@ -90,7 +90,6 @@ else {
 	// Something needs to be provided, otherwise there's nothing to check.
 
 	usage();
-	o("Please either provide a \"-f composer.json\" or \"-o packagist-owner\"\n");
 	exit();
 }
 
@@ -210,6 +209,12 @@ foreach ($composerFiles as $composerFile) {
 				}
 			}
 		}
+
+		// This is to space things out correctly when "check-git" is not being used.
+
+		else {
+			$notices[] = "";
+		}
 	}
 }
 
@@ -285,16 +290,6 @@ function del_tree($dir) {
 }
 
 function usage() {
-	o('php index.php -f /path/to/project/composer.json');
-
-	o("\t--modules=comma,separated");
-	o("\t\tA list of modules in the project to include in the inspection");
-
-	o("\t--version-fix=true");
-	o("\t\tWhether to output a 'recommended' composer .json that will provide");
-	o("\t\t_fixed_ versions to be bound to");
-
-	o("\t--check-git=true");
-	o("\t\tWhether to check git repositories for differences between master and ");
-	o("\t\tthe latest tagged version ");
+	o("Please either provide a \"-f composer.json\" or \"-o packagist,owners\"");
+	o("The options for configuration can be found in the documentation.\n");
 }

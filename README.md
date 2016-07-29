@@ -17,12 +17,14 @@ dependencies for SilverStripe projects.
 
 Use this if:
 
-* you want to generate a list of fixed version composer dependencies for a
+* You want to generate a list of fixed version composer dependencies for a
   SilverStripe project
 * You want to see whether the modules in your project have any updates
   that could be made use of
 * You want to know whether a repository has any changes that haven't made it
   to a stable tagged release yet.
+* You want to review the current state of tagging for a number of modules found
+  under a specific packagist owner.
 
 The motivation behind this tool is for projects to have a well
 defined version set of modules defined in the composer.json for that project.
@@ -39,18 +41,25 @@ export PATH=$PATH:/path/to/versionator
 
 `versionator -f /path/to/project/composer.json`
 
+**OR**
+
+`versionator -o packagist,owners`
+
 Will output the list of modules and their latest versions in packagist.
 
 **Options**
 
+--ssau
+* **--check-git** Whether to check git repositories for differences
+  between master and the latest tagged version of modules
 * **--modules=comma,separated,list** - A list of modules in the project
   to also include the composer.json settings for deeper inspection
-* **--version-fix** - Whether to output a 'recommended' composer .json
-  that will provide _fixed_ versions to be bound to
-* **--check-git=true** Whether to check git repositories for differences
-  between master and the latest tagged version of modules
 * **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
   If output path not specified, output is to versionator/workspace/readme
+* **--ssau** - Whether the core SSAU supported packagist modules should be
+  included
+* **--version-fix** - Whether to output a 'recommended' composer .json
+  that will provide _fixed_ versions to be bound to
 
 ## Example outputs
 
