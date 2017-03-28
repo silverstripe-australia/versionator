@@ -1,24 +1,14 @@
 <?php
 
-// The core SSAU supported packagist modules.
+// The SSAU supported packagist modules that fall under a different namespace.
 
 $supported = array(
 	'silverstripe/advancedworkflow',
-	'silverstripe/alchemiser',
 	'silverstripe/cdncontent',
 	'silverstripe/content-services',
-	'silverstripe/external-content',
-	'silverstripe/frontend-dashboards',
-	'silverstripe/listingpage',
-	'silverstripe/microblog',
 	'silverstripe/multivaluefield',
 	'silverstripe/queuedjobs',
-	'silverstripe/restrictedobjects',
 	'silverstripe/s3cdn',
-	'silverstripe/solr',
-	'silverstripe/syncrotron',
-	'silverstripe/usertemplates',
-	'silverstripe/versionedfiles',
-	'silverstripe/webservices'
+	'silverstripe/versionedfiles'
 );
 return $supported;
