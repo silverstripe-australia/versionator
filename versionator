@@ -118,8 +118,11 @@ foreach ($composerFiles as $composerFile) {
 		// The modules that we can ignore, since they're abandoned.
 
 		$ignored = array(
-			'nyeholt/news',
-			'silverstripe-australia/intranet-sis'
+			'silverstripe-australia/intranet-sis',
+			'silverstripe-australia/salesforce-auth',
+			'silverstripe-australia/silverstripe-pagejax',
+			'silverstripe-australia/vuforia',
+			'silverstripe-australia/wordpressconnector'
 		);
 		foreach($ignored as $ignore) {
 			unset($packages[$ignore]);
