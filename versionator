@@ -128,7 +128,7 @@ foreach ($composerFiles as $composerFile) {
 		// Use a base required version to check against.
 
 		foreach($packages as $package => $temporary) {
-			$packages[$package] = '~1.0';
+			$packages[$package] = 'dev-master';
 		}
 	}
 	foreach ($packages as $packageName => $requiredVersion) {
@@ -139,7 +139,7 @@ foreach ($composerFiles as $composerFile) {
 
 		// Retrieve the module from packagist.
 
-		$package = retrieve_package($packageName, $requiredVersion, $client);
+		$package = retrieve_package($packageName, $requiredVersion, $client, $options);
 		if(!$package) {
 			continue;
 		}
@@ -166,12 +166,12 @@ foreach ($composerFiles as $composerFile) {
 
 		$allRequirements[$packageName] = $latestVersion;
 
-		if (version_compare($latestVersion, $requiredVersion) > 0 && $latestVersion) {
+		if (!isset($options['o']) && (version_compare($latestVersion, $requiredVersion) > 0) && $latestVersion) {
 			$notices[] = "\033[31m✘ $packageName has an updated, fixed tag version available $latestVersion (currently $requiredVersion)\033[0m";
+		} else if (!isset($options['o']) && $latestVersion) {
+			$notices[] = "\033[32m✔ $packageName looks to be using the latest available version\033[0m";
 		} else if (!$latestVersion) {
 			$notices[] = "\033[0;36m✘ $packageName has no proper version available\033[0m";
-		} else {
-			$notices[] = "\033[32m✔ $packageName looks to be using the latest available version\033[0m";
 		}
 
 		// now check out the project
@@ -198,7 +198,8 @@ foreach ($composerFiles as $composerFile) {
 				if (strlen($out)) {
 					$lines = explode("\n", $out);
 					if (count($lines) > 0) {
-						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n";
+						$URL = substr($repo, 0, -4);
+						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n{$URL}/commit/{$latestRef}\n";
 					}
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
@@ -269,7 +270,7 @@ function o($txt) {
 	echo "$txt\n";
 }
 
-function retrieve_package($packageName, $requiredVersion, $client) {
+function retrieve_package($packageName, $requiredVersion, $client, $options) {
 	try {
 		$package = $client->get($packageName);
 	}
@@ -278,7 +279,9 @@ function retrieve_package($packageName, $requiredVersion, $client) {
 		return false;
 	}
 
-	o("Retrieved package " . $package->getName() . "\n");
+	if(!isset($options['o'])) {
+		o("Retrieved package " . $package->getName() . "\n");
+	}
 	return $package;
 }
 
