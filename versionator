@@ -151,8 +151,12 @@ foreach ($composerFiles as $composerFile) {
 		$latestVersion = 0;
 		$repo = null;
 		$latestRef = null;
+		$tip = null;
 
-		foreach ($package->getVersions() as $version) {
+		foreach ($package->getVersions() as $branch => $version) {
+			if($branch === 'dev-master') {
+				$tip = $version->getSource()->getReference();
+			}
 			/* @var $version Version */
 			$source = $version->getSource();
 
@@ -211,7 +215,7 @@ foreach ($composerFiles as $composerFile) {
 					if (count($lines) > 0) {
 						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n";
 						$URL = substr($repo, 0, -4);
-						$URLs[] = "* {$URL}/commit/{$latestRef}";
+						$URLs[] = "* {$URL}/commit/{$tip}";
 					}
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
