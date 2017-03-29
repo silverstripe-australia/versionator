@@ -211,7 +211,7 @@ foreach ($composerFiles as $composerFile) {
 					if (count($lines) > 0) {
 						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n";
 						$URL = substr($repo, 0, -4);
-						$URLs[] = "{$URL}/commit/{$latestRef}";
+						$URLs[] = "* {$URL}/commit/{$latestRef}";
 					}
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
