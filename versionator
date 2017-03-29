@@ -100,6 +100,7 @@ $time = isset($options['timeout']) ? intval($options['timeout']) : 120;
 $wrapper->setTimeout($time);
 
 $notices = array();
+$URLs = array();
 
 $allRequirements = array();
 $readmeContents = array();
@@ -167,6 +168,12 @@ foreach ($composerFiles as $composerFile) {
 			}
 		}
 
+		// Determine whether this repository actually belongs to SSAU, otherwise skip it.
+
+		if(isset($options['o']) && isset($options['ssau']) && (strpos($repo, '/silverstripe-australia/') === false)) {
+			continue;
+		}
+
 		$allRequirements[$packageName] = $latestVersion;
 
 		if (!isset($options['o']) && (version_compare($latestVersion, $requiredVersion) > 0) && $latestVersion) {
@@ -174,6 +181,7 @@ foreach ($composerFiles as $composerFile) {
 		} else if (!isset($options['o']) && $latestVersion) {
 			$notices[] = "\033[32m✔ $packageName looks to be using the latest available version\033[0m";
 		} else if (!$latestVersion) {
+
 			$notices[] = "\033[0;36m✘ $packageName has no proper version available\033[0m";
 		}
 
@@ -201,8 +209,9 @@ foreach ($composerFiles as $composerFile) {
 				if (strlen($out)) {
 					$lines = explode("\n", $out);
 					if (count($lines) > 0) {
+						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n";
 						$URL = substr($repo, 0, -4);
-						$notices[] = "\033[31m✘ $packageName: " . count($lines) . " commits found between $latestVersion ($latestRef) and master\033[0m\n{$URL}/commit/{$latestRef}\n";
+						$URLs[] = "{$URL}/commit/{$latestRef}";
 					}
 				} else {
 					$notices[] = "\033[32m✔ $packageName @ $latestVersion appears to be up-to-date\033[0m\n";
@@ -225,6 +234,13 @@ foreach ($composerFiles as $composerFile) {
 
 foreach ($notices as $notice) {
 	o($notice);
+}
+
+if(count($URLs)) {
+	foreach ($URLs as $URL) {
+		o($URL);
+	}
+	echo "\n";
 }
 
 if(isset($options['version-fix']) && $options['version-fix']) {
