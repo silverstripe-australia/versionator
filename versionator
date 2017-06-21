@@ -116,19 +116,6 @@ foreach ($composerFiles as $composerFile) {
 	else {
 		$packages = array_flip($modules);
 
-		// The modules that we can ignore, since they're abandoned.
-
-		$ignored = array(
-			'silverstripe-australia/intranet-sis',
-			'silverstripe-australia/salesforce-auth',
-			'silverstripe-australia/silverstripe-pagejax',
-			'silverstripe-australia/vuforia',
-			'silverstripe-australia/wordpressconnector'
-		);
-		foreach($ignored as $ignore) {
-			unset($packages[$ignore]);
-		}
-
 		// Use a base required version to check against.
 
 		foreach($packages as $package => $temporary) {
