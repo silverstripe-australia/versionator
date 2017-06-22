@@ -17,7 +17,6 @@ $options = getopt('f:o:', array(
 	'check-git',			// do we check whether the master branch is different from latest tag?
 	'modules::',			// which modules should we inspect?
 	'readme::',				// should we generate a collation of 'readme' files?
-	'ssau',
 	'version-fix::',		// do we output a list of 'fixed' versions for the modules based on packagist info?
 	'timeout::',
 	'workspace::'			// what folder to use as the 'workspace' for checking out data into?
@@ -70,13 +69,6 @@ else if(isset($options['o']) && $options['o']) {
 		$modules = array_merge($modules, $client->all(array(
 			'vendor' => trim($owner)
 		)));
-	}
-
-	// Determine whether the core SSAU supported packagist modules should be included.
-
-	if(isset($options['ssau']) && file_exists(__DIR__ . '/SSAU_supported_modules.php')) {
-		$other = include __DIR__ . '/SSAU_supported_modules.php';
-		$modules = array_merge($modules, $other);
 	}
 
 	// The following is used to determine whether a "composer.json" was provided.
@@ -157,12 +149,6 @@ foreach ($composerFiles as $composerFile) {
 			if (!$latestRef) {
 				$latestRef = $version->getSource()->getReference();
 			}
-		}
-
-		// Determine whether this repository actually belongs to SSAU, otherwise skip it.
-
-		if(isset($options['o']) && isset($options['ssau']) && (strpos($repo, '/silverstripe-australia/') === false)) {
-			continue;
 		}
 
 		$allRequirements[$packageName] = $latestVersion;

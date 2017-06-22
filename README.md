@@ -49,15 +49,12 @@ Will output the list of modules and their latest versions in packagist.
 
 **Options**
 
---ssau
 * **--check-git** Whether to check git repositories for differences
   between master and the latest tagged version of modules
 * **--modules=comma,separated,list** - A list of modules in the project
   to also include the composer.json settings for deeper inspection
 * **--readme[=/output/path/for/files]** - Output a list of readmes for modules.
   If output path not specified, output is to versionator/workspace/readme
-* **--ssau** - Whether the core SSAU supported packagist modules should be
-  included
 * **--version-fix** - Whether to output a 'recommended' composer .json
   that will provide _fixed_ versions to be bound to
 
@@ -68,11 +65,11 @@ Default output
 ```
 $ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json
 
-Retrieved package silverstripe-australia/build
+Retrieved package symbiote/silverstripe-build
 
-Retrieved package silverstripe-australia/ssautesting
+Retrieved package symbiote/silverstripe-test-assist
 
-Retrieved package silverstripe-australia/memberprofiles
+Retrieved package symbiote/silverstripe-memberprofiles
 
 Retrieved package silverstripe/restrictedobjects
 
@@ -80,9 +77,9 @@ Retrieved package silverstripe/frontend-dashboards
 
 Retrieved package silverstripe/microblog
 
-✘ silverstripe-australia/build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
-✘ silverstripe-australia/ssautesting has an updated, fixed tag version available 1.1.1 (currently ~1.0)
-✘ silverstripe-australia/memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
+✘ symbiote/silverstripe-build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
+✘ symbiote/silverstripe-test-assist has an updated, fixed tag version available 1.1.1 (currently ~1.0)
+✘ symbiote/silverstripe-memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
 ✘ silverstripe/restrictedobjects has an updated, fixed tag version available 2.1.5 (currently 2.1.*)
 ✘ silverstripe/frontend-dashboards has an updated, fixed tag version available 1.2.2 (currently ~1.2.0)
 ✘ silverstripe/microblog has an updated, fixed tag version available 1.9.3 (currently ~1.9.0)
@@ -93,11 +90,11 @@ Outputting the list of fixed versions
 ```
 $ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json --version-fix=true
 
-Retrieved package silverstripe-australia/build
+Retrieved package symbiote/silverstripe-build
 
-Retrieved package silverstripe-australia/ssautesting
+Retrieved package symbiote/silverstripe-test-assist
 
-Retrieved package silverstripe-australia/memberprofiles
+Retrieved package symbiote/silverstripe-memberprofiles
 
 Retrieved package silverstripe/restrictedobjects
 
@@ -105,17 +102,17 @@ Retrieved package silverstripe/frontend-dashboards
 
 Retrieved package silverstripe/microblog
 
-✘ silverstripe-australia/build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
-✘ silverstripe-australia/ssautesting has an updated, fixed tag version available 1.1.1 (currently ~1.0)
-✘ silverstripe-australia/memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
+✘ symbiote/silverstripe-build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
+✘ symbiote/silverstripe-test-assist has an updated, fixed tag version available 1.1.1 (currently ~1.0)
+✘ symbiote/silverstripe-memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
 ✘ silverstripe/restrictedobjects has an updated, fixed tag version available 2.1.5 (currently 2.1.*)
 ✘ silverstripe/frontend-dashboards has an updated, fixed tag version available 1.2.2 (currently ~1.2.0)
 ✘ silverstripe/microblog has an updated, fixed tag version available 1.9.3 (currently ~1.9.0)
 Recommended project composer requirements:
 
-		"silverstripe-australia/build": "1.2.3",
-		"silverstripe-australia/ssautesting": "1.1.1",
-		"silverstripe-australia/memberprofiles": "1.1.1",
+		"symbiote/silverstripe-build": "1.2.3",
+		"symbiote/silverstripe-test-assist": "1.1.1",
+		"symbiote/silverstripe-memberprofiles": "1.1.1",
 		"silverstripe/restrictedobjects": "2.1.5",
 		"silverstripe/frontend-dashboards": "1.2.2",
 		"silverstripe/microblog": "1.9.3",
@@ -128,11 +125,11 @@ Adding additional modules to dig into from the project (note the extra modules i
 ```
 $ versionator.sh -f /home/marcus/www/projects/cycle-int/composer.json --modules=microblog
 
-Retrieved package silverstripe-australia/build
+Retrieved package symbiote/silverstripe-build
 
-Retrieved package silverstripe-australia/ssautesting
+Retrieved package symbiote/silverstripe-test-assist
 
-Retrieved package silverstripe-australia/memberprofiles
+Retrieved package symbiote/silverstripe-memberprofiles
 
 Retrieved package silverstripe/restrictedobjects
 
@@ -140,20 +137,20 @@ Retrieved package silverstripe/frontend-dashboards
 
 Retrieved package silverstripe/microblog
 
-Retrieved package silverstripe/multivaluefield
+Retrieved package symbiote/silverstripe-multivaluefield
 
-Retrieved package silverstripe/queuedjobs
+Retrieved package symbiote/silverstripe-queuedjobs
 
 Retrieved package silverstripe/restrictedobjects
 
-✘ silverstripe-australia/build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
-✘ silverstripe-australia/ssautesting has an updated, fixed tag version available 1.1.1 (currently ~1.0)
-✘ silverstripe-australia/memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
+✘ symbiote/silverstripe-build has an updated, fixed tag version available 1.2.3 (currently ~1.0)
+✘ symbiote/silverstripe-test-assist has an updated, fixed tag version available 1.1.1 (currently ~1.0)
+✘ symbiote/silverstripe-memberprofiles has an updated, fixed tag version available 1.1.1 (currently 1.1.*)
 ✘ silverstripe/restrictedobjects has an updated, fixed tag version available 2.1.5 (currently 2.1.*)
 ✘ silverstripe/frontend-dashboards has an updated, fixed tag version available 1.2.2 (currently ~1.2.0)
 ✘ silverstripe/microblog has an updated, fixed tag version available 1.9.3 (currently ~1.9.0)
-✘ silverstripe/multivaluefield has an updated, fixed tag version available 2.0.5 (currently ~2.0)
-✘ silverstripe/queuedjobs has an updated, fixed tag version available 2.4.0 (currently ~2.2)
+✘ symbiote/silverstripe-multivaluefield has an updated, fixed tag version available 2.0.5 (currently ~2.0)
+✘ symbiote/silverstripe-queuedjobs has an updated, fixed tag version available 2.4.0 (currently ~2.2)
 ✘ silverstripe/restrictedobjects has an updated, fixed tag version available 2.1.5 (currently ~2.1)
 
 ```
